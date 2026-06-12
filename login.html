@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Login | Renewable Power</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="auth-wrap">
+  <!-- Left art -->  
+  <div class="auth-art">
+    <div>
+      <!-- <a href="index.html"><img src="logo-stackly.png" alt="STACKLY" class="nav-logo-img"></a> -->
+      <h1 data-split>Welcome Back</h1>
+      <span class="eyebrow">Renewable Power Portal</span>
+        <!-- <section class="hero"> -->
+          <!-- <div class="container"> -->
+            <div>
+              <h1><span data-split>Powering Life With</span><br><span class="accent" data-split>Renewable Energy</span></h1>
+              <p class="lead">From rooftop solar to utility-scale wind farms, Renewable Power designs, builds, and maintains clean-energy systems that cut your bills and carbon footprint — for homes, businesses, and entire communities.</p>  
+            </div><br><br><br>      
+        <!-- </section> -->
+              <h2 data-split>Your Energy, Live and In Your Hands</h2>
+      <!-- <h1><span data-split>Powering Life With</span><br><span class="accent" data-split>Renewable Energy</span></h1> -->
+      <p style="color:#bcd9c9;max-width:420px">Track every kilowatt your system generates, view savings, raise service tickets, and download reports — all from one dashboard.</p>
+    </div>
+  </div>
+
+  <!-- Right panel -->
+  <div class="auth-panel">
+    <div class="auth-card">
+      <a href="index.html"><img src="logo-stackly.png" alt="STACKLY" class="nav-logo-img"></a>
+      <h1 data-split>Welcome Back</h1>
+      <p class="sub">Sign in to access your dashboard.</p>
+
+      <!-- Role selector -->
+      <div class="auth-tabs" id="roleTabs">
+        <button type="button" class="active" data-role="user">👤 User</button>
+        <button type="button" data-role="admin">🛠️ Admin</button>
+      </div>
+
+      <!-- Mode toggle: Sign In / Create Account -->
+      <div class="mode-switch">
+        <button type="button" id="toggle-signin" class="active" onclick="switchMode('signin')">Sign In</button>
+        <button type="button" id="toggle-signup" onclick="switchMode('signup')">Create Account</button>
+      </div>
+
+      <!-- ════ SIGN IN PANEL ════ -->
+      <form id="loginForm" class="auth-form-panel active" novalidate>
+        <div class="alert"></div>
+        <div class="field" style="margin-bottom:4px">
+          <label for="signin-email">Email Address</label>
+          <input type="email" id="signin-email" placeholder="Enter your email" required>
+          <span class="err-msg" id="err-signin-email">Please enter a valid email address.</span>
+        </div>
+        <div class="field" style="margin:12px 0 4px">
+          <label for="signin-pass">Password</label>
+          <div class="pw-wrap"><input type="password" id="signin-pass" placeholder="Enter your password" required><button type="button" class="pw-toggle" aria-label="Show or hide password" data-target="signin-pass">
+            <svg class="eye-on" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            <svg class="eye-off" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><path d="M14.12 14.12a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+          </button></div>
+          <span class="err-msg" id="err-signin-pass">Please enter your password.</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin:14px 0 20px;font-size:.88rem">
+          <label style="display:flex;gap:8px;align-items:center;color:var(--mut)"><input type="checkbox"> Remember me</label>
+          <a href="#" style="color:var(--flame);font-weight:600">Forgot password?</a>
+        </div>
+        <button type="submit" id="btn-signin" class="btn btn-solar" style="width:100%;justify-content:center">Sign In ⚡</button>
+      </form>
+
+      <!-- ════ FORGOT PASSWORD MODAL ════ -->
+<div id="forgotModal" class="rp-modal-overlay" aria-hidden="true">
+  <div class="rp-modal">
+    <button class="rp-modal-close" id="forgotClose" aria-label="Close">✕</button>
+    <div style="font-size:2rem;margin-bottom:10px">🔑</div>
+    <h2>Reset Password</h2>
+    <p>Enter your email and we'll send you a reset link.</p>
+    <div class="field" style="margin:18px 0 6px">
+      <label for="forgot-email">Email Address</label>
+      <input type="email" id="forgot-email" placeholder="Enter your email">
+      <span class="err-msg" id="err-forgot-email">Please enter a valid email address.</span>
+    </div>
+    <button id="btn-forgot" class="btn btn-solar" style="width:100%;justify-content:center;margin-top:16px">Send Reset Link</button>
+    <div class="alert" id="forgot-alert"></div>
+  </div>
+</div>
+
+<!-- ════ SUCCESS POPUP MODAL ════ -->
+<div id="successModal" class="rp-modal-overlay" aria-hidden="true">
+  <div class="rp-modal rp-modal--success">
+    <div class="success-icon">✓</div>
+    <h2>Account Created!</h2>
+    <p>Your account has been created successfully.<br>You can now sign in.</p>
+    <button id="successOk" class="btn btn-solar" style="margin-top:24px;width:100%;justify-content:center">Sign In Now</button>
+  </div>
+</div>
+
+      <!-- ════ SIGN UP PANEL ════ -->
+      <form id="signupForm" class="auth-form-panel" novalidate>
+        <div class="alert"></div>
+        <div class="field" style="margin-bottom:4px">
+          <label for="signup-name">First Name</label>
+          <input type="text" id="signup-name" placeholder="Enter your first name" required>
+          <span class="err-msg" id="err-signup-name">Please enter your first name.</span>
+        </div>
+        <div class="field" style="margin-bottom:4px">
+          <label for="signup-last-name">Last Name</label>
+          <input type="text" id="signup-last-name" placeholder="Enter your last name" required>
+          <span class="err-msg" id="err-signup-last-name">Please enter your last name.</span>
+        </div>
+        <div class="field" style="margin:12px 0 4px">
+          <label for="signup-email">Email Address</label>
+          <input type="email" id="signup-email" placeholder="Enter your email" required>
+          <span class="err-msg" id="err-signup-email">Please enter a valid email address.</span>
+        </div>
+        <div class="field" style="margin:12px 0 4px">
+          <label for="signup-pass">Password</label>
+          <div class="pw-wrap"><input type="password" id="signup-pass" placeholder="Minimum 6 characters"><button type="button" class="pw-toggle" aria-label="Show or hide password" data-target="signup-pass">
+            <svg class="eye-on" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            <svg class="eye-off" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><path d="M14.12 14.12a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+          </button></div>
+          <span class="err-msg" id="err-signup-pass">Password must be at least 6 characters.</span>
+        </div>
+        <div class="field" style="margin:12px 0 18px">
+          <label for="signup-confirm">Confirm Password</label>
+          <div class="pw-wrap"><input type="password" id="signup-confirm" placeholder="Re-enter password"><button type="button" class="pw-toggle" aria-label="Show or hide password" data-target="signup-confirm">
+            <svg class="eye-on" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+            <svg class="eye-off" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><path d="M14.12 14.12a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+          </button></div>
+          <span class="err-msg" id="err-signup-confirm">Passwords do not match.</span>
+        </div>
+        <p style="color:black;font-size:12px;text-align:center;margin-top:12px;">
+          By creating an account you agree to our
+          <a href="./error.html" style="color:orangered;">Terms</a> and
+          <a href="./error.html" style="color:orangered;">Privacy Policy</a>
+        </p> <br>
+        <button type="submit" id="btn-signup" class="btn btn-solar" style="width:100%;justify-content:center">Create My Account →</button>
+      </form>
+
+      <div class="or-divider"><span>or</span></div>
+
+      <button type="button" class="btn-google" onclick="window.location.href='./error.html'" href='./error.html'>
+        <svg width="20" height="20" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+          <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+          <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+          <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+        </svg>
+        Continue with Google
+      </button>
+
+      <p style="margin-top:18px;font-size:.85rem"><a href="index.html" style="color:var(--mut)">← Back to website</a></p>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="script.js"></script>
+</body>
+</html>
