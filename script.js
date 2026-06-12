@@ -30,7 +30,6 @@ document.addEventListener('DOMContentLoaded', () => {
       document.body.classList.toggle('nav-open', navLinks.classList.contains('open'));
     });
     navLinks.querySelectorAll('a').forEach(a => a.addEventListener('click', closeNav));
-    // Tap the dark overlay (outside the panel) to close
     document.addEventListener('click', e => {
       if (document.body.classList.contains('nav-open') &&
           !navLinks.contains(e.target) && !burger.contains(e.target)) closeNav();
@@ -53,7 +52,6 @@ document.addEventListener('DOMContentLoaded', () => {
     gsap.registerPlugin(ScrollTrigger);
     const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-    /* Split text into animated characters (word-wrapped to avoid breaks) */
     document.querySelectorAll('[data-split]').forEach(el => {
       const words = el.textContent.trim().split(/\s+/);
       el.innerHTML = words.map(w =>
@@ -71,7 +69,6 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     });
 
-    /* Generic fade-up reveals */
     document.querySelectorAll('.reveal').forEach((el, i) => {
       gsap.fromTo(el, { y: 50, opacity: 0 }, {
         y: 0, opacity: 1,
@@ -82,7 +79,6 @@ document.addEventListener('DOMContentLoaded', () => {
       });
     });
 
-    /* Hero entrance sequence */
     const heroLead = document.querySelector('.hero p.lead');
     if (heroLead && !reduce) {
       gsap.from([heroLead, '.hero-actions', '.hero-stats'], {
@@ -158,10 +154,38 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   /* ============================================================
-     LOGIN (demo authentication — no backend)
-     admin@renewable.com / admin123  → admin dashboard
-     user@renewable.com  / user123   → user dashboard
+     MODAL HELPERS
      ============================================================ */
+  const openModal = id => {
+    const m = document.getElementById(id);
+    if (!m) return;
+    m.classList.add('open');
+    m.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+  };
+
+  const closeModal = id => {
+    const m = document.getElementById(id);
+    if (!m) return;
+    m.classList.remove('open');
+    m.setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = '';
+  };
+
+  /* Close modal when clicking the dark overlay behind it */
+  document.querySelectorAll('.rp-modal-overlay').forEach(overlay => {
+    overlay.addEventListener('click', e => {
+      if (e.target === overlay) closeModal(overlay.id);
+    });
+  });
+
+  /* Escape key closes any open modal */
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') {
+      document.querySelectorAll('.rp-modal-overlay.open').forEach(m => closeModal(m.id));
+    }
+  });
+
   /* ============================================================
      AUTH — modelled on the reference portal:
      · Sign-up accounts stored in localStorage ('rp_accounts')
@@ -176,7 +200,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const readSession = () => {
     try { const s = safeGet('sessionStorage', 'rp_current_user'); if (s) return JSON.parse(s); } catch (e) { /* blocked */ }
-    const q = new URLSearchParams(location.search);                 // URL fallback
+    const q = new URLSearchParams(location.search);
     if (q.get('name')) return { name: q.get('name'), role: q.get('role') || 'user', email: q.get('email') || '' };
     return null;
   };
@@ -246,10 +270,10 @@ document.addEventListener('DOMContentLoaded', () => {
       }, 1000);
     });
 
-    /* ── CONTINUE WITH GOOGLE (demo — replace with real OAuth in production) ── */
+    /* ── CONTINUE WITH GOOGLE (demo) ── */
     window.googleSignIn = () => {
       const input = prompt('Continue with Google\n\nEnter your Google email:', 'yourname@gmail.com');
-      if (input === null) return;                                   // cancelled
+      if (input === null) return;
       const email = input.trim().toLowerCase();
       if (!emailRx.test(email)) { alert('Please enter a valid Google email address.'); return; }
       const stored = accounts[email];
@@ -270,37 +294,129 @@ document.addEventListener('DOMContentLoaded', () => {
       const pass = document.getElementById('signup-pass').value;
       const confirm = document.getElementById('signup-confirm').value;
       let valid = true;
+
       if (!name) { showErr('err-signup-name', true); markInput('signup-name', true); valid = false; }
       else { showErr('err-signup-name', false); markInput('signup-name', false); }
-      if (!name) { showErr('err-signup-name', true); markInput('signup-name', true); valid = false; }
-      else { showErr('err-signup-name', false); markInput('signup-name', false); }
+
       if (!lastName) { showErr('err-signup-last-name', true); markInput('signup-last-name', true); valid = false; }
       else { showErr('err-signup-last-name', false); markInput('signup-last-name', false); }
+
       if (!email || !emailRx.test(email)) { showErr('err-signup-email', true); markInput('signup-email', true); valid = false; }
       else { showErr('err-signup-email', false); markInput('signup-email', false); }
+
       if (pass.length < 6) { showErr('err-signup-pass', true); markInput('signup-pass', true); valid = false; }
       else { showErr('err-signup-pass', false); markInput('signup-pass', false); }
+
       if (pass !== confirm) { showErr('err-signup-confirm', true); markInput('signup-confirm', true); valid = false; }
       else { showErr('err-signup-confirm', false); markInput('signup-confirm', false); }
+
       if (!valid) return;
 
       const btn = document.getElementById('btn-signup');
       btn.textContent = 'Creating account…'; btn.disabled = true;
+
       setTimeout(() => {
         btn.textContent = 'Create My Account →'; btn.disabled = false;
-        accounts[email] = { name, email, pass };
+
+        /* Save account to localStorage */
+        const fullName = name + ' ' + lastName;
+        accounts[email] = { name: fullName, email, pass };
         safeSet('localStorage', 'rp_accounts', JSON.stringify(accounts));
-        switchMode('signin');
-        document.getElementById('signin-email').value = email;
-        const alertBox = loginForm.querySelector('.alert');
-        alertBox.className = 'alert ok';
-        alertBox.textContent = 'Account created for ' + name + '. Sign in to continue.';
+
+        /* Pre-fill the sign-in email for convenience */
+        const signinEmailEl = document.getElementById('signin-email');
+        if (signinEmailEl) signinEmailEl.value = email;
+
+        /* Reset the sign-up form */
         signupForm.reset();
+
+        /* Show the success popup modal */
+        const successMsg = document.getElementById('successMsg');
+        if (successMsg) successMsg.innerHTML = `Your account has been created successfully!<br>Welcome aboard, <strong>${name}</strong> 🎉`;
+        openModal('successModal');
+
       }, 1000);
     });
-  }
 
-  /* ---------- Dashboard personalization (reference pattern) ---------- */
+    /* ── SUCCESS MODAL — "Sign In Now" button ── */
+    const successOk = document.getElementById('successOk');
+    if (successOk) {
+      successOk.addEventListener('click', () => {
+        closeModal('successModal');
+        switchMode('signin');
+      });
+    }
+
+    /* ── FORGOT PASSWORD MODAL ── */
+    const forgotLink = document.getElementById('forgotLink');
+    if (forgotLink) {
+      forgotLink.addEventListener('click', e => {
+        e.preventDefault();
+        /* Clear any previous state */
+        const forgotEmail = document.getElementById('forgot-email');
+        const forgotAlert = document.getElementById('forgot-alert');
+        const errForgot = document.getElementById('err-forgot-email');
+        const btnForgot = document.getElementById('btn-forgot');
+        if (forgotEmail) { forgotEmail.value = ''; forgotEmail.classList.remove('error'); }
+        if (forgotAlert) { forgotAlert.className = 'alert'; forgotAlert.textContent = ''; }
+        if (errForgot) errForgot.classList.remove('show');
+        if (btnForgot) { btnForgot.textContent = 'Send Reset Link ✉️'; btnForgot.disabled = false; }
+        /* Pre-fill with whatever the user typed in sign-in email */
+        const currentEmail = document.getElementById('signin-email').value.trim();
+        if (forgotEmail && currentEmail) forgotEmail.value = currentEmail;
+        openModal('forgotModal');
+      });
+    }
+
+    /* Close forgot modal X button */
+    const forgotClose = document.getElementById('forgotClose');
+    if (forgotClose) forgotClose.addEventListener('click', () => closeModal('forgotModal'));
+
+    /* Forgot password — send reset link */
+    const btnForgot = document.getElementById('btn-forgot');
+    if (btnForgot) {
+      btnForgot.addEventListener('click', () => {
+        const emailEl = document.getElementById('forgot-email');
+        const errEl = document.getElementById('err-forgot-email');
+        const alertEl = document.getElementById('forgot-alert');
+        const email = emailEl ? emailEl.value.trim().toLowerCase() : '';
+
+        /* Validate */
+        if (!email || !emailRx.test(email)) {
+          if (emailEl) emailEl.classList.add('error');
+          if (errEl) errEl.classList.add('show');
+          return;
+        }
+        if (emailEl) emailEl.classList.remove('error');
+        if (errEl) errEl.classList.remove('show');
+        if (alertEl) { alertEl.className = 'alert'; alertEl.textContent = ''; }
+
+        btnForgot.textContent = 'Sending…'; btnForgot.disabled = true;
+
+        setTimeout(() => {
+          btnForgot.textContent = 'Send Reset Link ✉️'; btnForgot.disabled = false;
+          if (alertEl) {
+            alertEl.className = 'alert ok';
+            alertEl.textContent = '✓ Reset link sent to ' + email + '. Please check your inbox.';
+          }
+          if (emailEl) emailEl.value = '';
+        }, 1200);
+      });
+
+      /* Clear error on input */
+      const forgotEmailEl = document.getElementById('forgot-email');
+      if (forgotEmailEl) {
+        forgotEmailEl.addEventListener('input', () => {
+          forgotEmailEl.classList.remove('error');
+          const errEl = document.getElementById('err-forgot-email');
+          if (errEl) errEl.classList.remove('show');
+        });
+      }
+    }
+
+  } // end if(loginForm)
+
+  /* ---------- Dashboard personalization ---------- */
   const dashRoot = document.querySelector('.dash');
   if (dashRoot) {
     const u = readSession();
@@ -342,12 +458,12 @@ document.addEventListener('DOMContentLoaded', () => {
   if (calcBill) {
     const fmt = n => n.toLocaleString('en-IN');
     const update = () => {
-      const bill = +calcBill.value;                       // ₹ / month
-      const tariff = 8;                                   // ₹ per kWh
-      const usage = bill / tariff;                        // kWh / month
-      const sizeKw = usage / 120;                         // 120 kWh per kW per month
-      const monthlySave = bill * 0.9;                     // 90% offset
-      const cost = sizeKw * 55000;                        // ₹55k per kW installed
+      const bill = +calcBill.value;
+      const tariff = 8;
+      const usage = bill / tariff;
+      const sizeKw = usage / 120;
+      const monthlySave = bill * 0.9;
+      const cost = sizeKw * 55000;
       const paybackYrs = cost / (monthlySave * 12);
       const lifeSaveLakh = (monthlySave * 12 * 25 - cost) / 100000;
       document.getElementById('calcBillVal').textContent = fmt(bill);
@@ -370,7 +486,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const xBtn = sidebar.querySelector('.sidebar-close');
     if (xBtn) xBtn.addEventListener('click', closeSide);
     sidebar.querySelectorAll('a').forEach(a => a.addEventListener('click', closeSide));
-    // Tap outside the panel closes it too
     document.addEventListener('click', e => {
       if (sidebar.classList.contains('open') && !sidebar.contains(e.target)) closeSide();
     });
@@ -383,4 +498,5 @@ document.addEventListener('DOMContentLoaded', () => {
       if (window.gsap) gsap.to(row, { opacity: 0, x: 40, duration: .4, onComplete: () => row.remove() });
       else row.remove();
     }));
+
 });
